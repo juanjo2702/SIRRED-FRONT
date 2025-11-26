@@ -24,7 +24,8 @@ const routes = [
       { path: 'sedes', component: () => import('pages/SedesPage.vue') },
       { path: 'carreras', component: () => import('pages/CarrerasPage.vue') },
       { path: 'upload', component: () => import('pages/UploadPage.vue') },
-      { path: 'control', component: () => import('pages/ControlPage.vue') }
+      { path: 'control', component: () => import('pages/ControlPage.vue') },
+      { path: 'control-afiliacion-retencion', component: () => import('pages/AffiliationRetentionPage.vue') }
     ]
   },
 

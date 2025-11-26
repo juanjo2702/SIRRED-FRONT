@@ -35,6 +35,7 @@
                             label="Contraseña"
                             :type="showPassword ? 'text' : 'password'"
                             outlined
+                            autocomplete="current-password"
                             :rules="[val => !!val || 'Contraseña es requerida']"
                         >
                             <template v-slot:prepend>
