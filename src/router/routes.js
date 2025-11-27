@@ -18,7 +18,7 @@ const routes = [
     component: () => import('layouts/MainLayout.vue'),
     meta: { requiresAuth: true },
     children: [
-      { path: '', redirect: '/users' },
+      { path: '', component: () => import('pages/IndexPage.vue') },
       { path: 'users', component: () => import('pages/UsersPage.vue') },
       { path: 'cortes', component: () => import('pages/CortesPage.vue') },
       { path: 'sedes', component: () => import('pages/SedesPage.vue') },

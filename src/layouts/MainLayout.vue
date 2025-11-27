@@ -6,9 +6,11 @@
 
         <q-toolbar-title class="text-weight-medium">
           <div class="row items-center">
-            <q-icon name="school" size="28px" class="q-mr-sm" />
-            <span class="gt-xs">SIRRED - Universidad Técnica Privada Cosmos</span>
-            <span class="lt-sm">SIRRED</span>
+            <div
+              style="background: white; padding: 4px 8px; border-radius: 8px; display: flex; align-items: center; margin-right: 12px;">
+              <img src="/logo-unitepc.png" alt="UNITEPC" style="height: 28px; display: block;" />
+            </div>
+            <span>SIRRED</span>
           </div>
         </q-toolbar-title>
 
@@ -25,6 +27,16 @@
           <q-item-label header class="text-weight-bold text-grey-8 q-px-md q-pt-md q-pb-sm">
             Menú Principal
           </q-item-label>
+
+          <q-item clickable v-ripple to="/" exact exact-active-class="bg-primary text-white"
+            class="q-mx-sm q-mb-xs rounded-borders">
+            <q-item-section avatar>
+              <q-icon name="dashboard" />
+            </q-item-section>
+            <q-item-section>
+              <q-item-label>Dashboard</q-item-label>
+            </q-item-section>
+          </q-item>
 
           <q-item clickable v-ripple to="/users" exact-active-class="bg-primary text-white"
             class="q-mx-sm q-mb-xs rounded-borders">
