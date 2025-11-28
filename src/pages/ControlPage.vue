@@ -64,14 +64,20 @@
       <div class="text-subtitle1 text-grey-8">
         {{ filteredFacturaciones.length }} factura(s) encontrada(s)
       </div>
-      <q-btn color="positive" icon="download" label="Exportar a Excel" unelevated @click="exportToExcel"
-        :disable="filteredFacturaciones.length === 0">
-        <q-tooltip>Descargar datos filtrados en Excel</q-tooltip>
-      </q-btn>
+      <div class="row q-gutter-sm">
+        <q-btn v-if="selected.length > 0" color="warning" icon="edit" :label="`Editar (${selected.length})`" unelevated
+          @click="openBulkEditDialog">
+          <q-tooltip>Editar Sede/Carrera de seleccionados</q-tooltip>
+        </q-btn>
+        <q-btn color="positive" icon="download" label="Exportar a Excel" unelevated @click="exportToExcel"
+          :disable="filteredFacturaciones.length === 0">
+          <q-tooltip>Descargar datos filtrados en Excel</q-tooltip>
+        </q-btn>
+      </div>
     </div>
 
     <q-table :rows="filteredFacturaciones" :columns="columns" row-key="id" :loading="loading" flat bordered
-      :rows-per-page-options="[10, 25, 50, 100]" class="shadow-2">
+      :rows-per-page-options="[10, 25, 50, 100]" class="shadow-2" selection="multiple" v-model:selected="selected">
       <template v-slot:body-cell-docente="props">
         <q-td :props="props">
           <div>
@@ -148,6 +154,33 @@
         </q-td>
       </template>
     </q-table>
+
+    <!-- Edit Dialog -->
+    <q-dialog v-model="editDialog" persistent>
+      <q-card style="min-width: 350px">
+        <q-card-section>
+          <div class="text-h6">{{ isBulkEdit ? 'Editar Múltiples Asignaciones' : 'Editar Asignación' }}</div>
+          <div v-if="isBulkEdit" class="text-caption text-grey-7">
+            Se actualizarán {{ selected.length }} registros seleccionados.
+          </div>
+        </q-card-section>
+
+        <q-card-section class="q-pt-none">
+          <div class="q-gutter-md">
+            <q-select v-model="editForm.sede" :options="allSedes" option-label="nombre" option-value="id" label="Sede"
+              outlined dense @update:model-value="onEditSedeChange" />
+
+            <q-select v-model="editForm.carrera" :options="availableCarreras" option-label="nombre" option-value="id"
+              label="Carrera" outlined dense :disable="!editForm.sede" />
+          </div>
+        </q-card-section>
+
+        <q-card-actions align="right" class="text-primary">
+          <q-btn flat label="Cancelar" v-close-popup />
+          <q-btn flat label="Guardar" @click="saveEdit" :loading="savingEdit" />
+        </q-card-actions>
+      </q-card>
+    </q-dialog>
   </q-page>
 </template>
 
@@ -168,6 +201,20 @@ export default {
     const estadoSubida = ref({ label: 'Todos', value: null })
     const loading = ref(false)
     const searchQuery = ref('')
+    const selected = ref([])
+
+    // Edit Dialog State
+    const editDialog = ref(false)
+    const isBulkEdit = ref(false)
+    const savingEdit = ref(false)
+    const editForm = ref({
+      id: null,
+      sede: null,
+      carrera: null
+    })
+    const allSedes = ref([])
+    const allCarreras = ref([])
+    const availableCarreras = ref([])
 
     const estadoOptions = [
       { label: 'Todos', value: null },
@@ -393,8 +440,73 @@ export default {
       }
     }
 
+    const loadAllSedesAndCarreras = async () => {
+      try {
+        const token = localStorage.getItem('token')
+        const [sedesRes, carrerasRes] = await Promise.all([
+          api.get('/sedes', { headers: { Authorization: `Bearer ${token}` } }),
+          api.get('/carreras', { headers: { Authorization: `Bearer ${token}` } })
+        ])
+        allSedes.value = sedesRes.data
+        allCarreras.value = carrerasRes.data
+      } catch (error) {
+        console.error('Error loading metadata', error)
+      }
+    }
+
+    const openBulkEditDialog = () => {
+      isBulkEdit.value = true
+      editForm.value = {
+        id: null,
+        sede: null,
+        carrera: null
+      }
+      availableCarreras.value = []
+      editDialog.value = true
+    }
+
+    const onEditSedeChange = (sede) => {
+      if (!sede) {
+        availableCarreras.value = []
+        editForm.value.carrera = null
+        return
+      }
+      availableCarreras.value = allCarreras.value
+    }
+
+    const saveEdit = async () => {
+      if (!editForm.value.sede || !editForm.value.carrera) {
+        $q.notify({ type: 'warning', message: 'Seleccione Sede y Carrera' })
+        return
+      }
+
+      savingEdit.value = true
+      try {
+        const token = localStorage.getItem('token')
+
+        const ids = selected.value.map(s => s.id)
+        await api.post('/facturaciones/bulk-update', {
+          ids,
+          sede_id: editForm.value.sede.id,
+          carrera_id: editForm.value.carrera.id
+        }, {
+          headers: { Authorization: `Bearer ${token}` }
+        })
+        $q.notify({ type: 'positive', message: 'Registros actualizados correctamente' })
+        selected.value = [] // Clear selection
+
+        editDialog.value = false
+        loadFacturaciones()
+      } catch (error) {
+        $q.notify({ type: 'negative', message: error.response?.data?.message || 'Error al actualizar' })
+      } finally {
+        savingEdit.value = false
+      }
+    }
+
     onMounted(() => {
       loadCortes()
+      loadAllSedesAndCarreras()
     })
 
     return {
@@ -417,7 +529,17 @@ export default {
       downloadFactura,
       approveFactura,
       denyFactura,
-      exportToExcel
+      exportToExcel,
+      editDialog,
+      isBulkEdit,
+      editForm,
+      selected,
+      allSedes,
+      availableCarreras,
+      openBulkEditDialog,
+      onEditSedeChange,
+      saveEdit,
+      savingEdit
     }
   }
 }
