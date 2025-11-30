@@ -392,7 +392,8 @@ export default {
       try {
         const token = localStorage.getItem('token')
         const params = {
-          corte_id: selectedCorte.value.id
+          corte_id: selectedCorte.value.id,
+          tipo_contrato: 'FACTURACION'
         }
 
         if (estadoSubida.value?.value !== null && estadoSubida.value?.value !== 'null') {
