@@ -74,6 +74,12 @@
                     <q-td key="nombre" :props="props">
                         {{ props.row.nombre }}
                     </q-td>
+                    <q-td key="abreviacion" :props="props">
+                        <q-badge v-if="props.row.abreviacion" color="primary" outline>
+                            {{ props.row.abreviacion }}
+                        </q-badge>
+                        <span v-else class="text-grey-5 text-caption">Sin abreviación</span>
+                    </q-td>
                     <q-td key="carreras" :props="props">
                         <div class="row items-center q-gutter-xs">
                             <q-badge
@@ -136,6 +142,8 @@
                     <q-form @submit="saveSede">
                         <q-input v-model="form.nombre" label="Nombre" outlined dense class="q-mb-md"
                             :rules="[val => !!val || 'Requerido']" />
+                        <q-input v-model="form.abreviacion" label="Abreviación (para facturas)" outlined dense class="q-mb-md"
+                            hint="Ej: LP, EA, SCZ (Máx 10 caracteres)" :rules="[val => !val || val.length <= 10 || 'Máximo 10 caracteres']" />
 
                         <div class="row q-gutter-sm">
                             <q-btn label="Cancelar" color="grey" flat @click="showDialog = false" />
@@ -219,13 +227,14 @@ export default {
         const showDialog = ref(false)
         const showCarrerasDialog = ref(false)
         const editMode = ref(false)
-        const form = ref({ nombre: '' })
+        const form = ref({ nombre: '', abreviacion: '' })
         const selectedSede = ref(null)
         const selectedCarreras = ref([])
         const searchQuery = ref('')
 
         const columns = [
             { name: 'nombre', label: 'Nombre', field: 'nombre', align: 'left', sortable: true },
+            { name: 'abreviacion', label: 'Abreviación', field: 'abreviacion', align: 'left', sortable: true },
             { name: 'carreras', label: 'Carreras', align: 'left' },
             { name: 'actions', label: 'Acciones', align: 'center' }
         ]
@@ -273,7 +282,7 @@ export default {
                 form.value = { ...sede }
                 editMode.value = true
             } else {
-                form.value = { nombre: '' }
+                form.value = { nombre: '', abreviacion: '' }
                 editMode.value = false
             }
             showDialog.value = true
