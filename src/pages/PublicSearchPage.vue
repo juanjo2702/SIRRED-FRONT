@@ -106,20 +106,70 @@
                   </div>
                 </div>
 
-                <div v-else-if="facturacion.estado_subida === 'SUBIDA' || facturacion.estado_subida === 'APROBADO'">
+                <div v-else-if="facturacion.estado_subida === 'SUBIDA'">
+                  <q-card flat bordered class="bg-blue-1 border-blue">
+                    <q-card-section>
+                      <div class="row items-center justify-between q-mb-md">
+                        <div class="row items-center">
+                          <q-icon name="cloud_upload" color="blue" size="32px" class="q-mr-md" />
+                          <div>
+                            <div class="text-subtitle1 text-weight-bold text-blue">
+                              Factura Subida Correctamente
+                            </div>
+                            <div class="text-caption text-grey-8">
+                              Registrada el {{ new Date(facturacion.fecha_subida).toLocaleDateString() }}
+                            </div>
+                          </div>
+                        </div>
+                        <q-btn flat round color="primary" icon="visibility" @click="viewFactura(facturacion)">
+                          <q-tooltip>Ver Factura</q-tooltip>
+                        </q-btn>
+                      </div>
+
+                      <q-banner class="bg-warning text-white q-mb-md" rounded>
+                        <template v-slot:avatar>
+                          <q-icon name="info" />
+                        </template>
+                        <div class="text-weight-bold">¿Necesita reemplazar su factura?</div>
+                        <div class="text-caption">Si detectó un error, puede subir una nueva factura. La anterior será reemplazada.</div>
+                      </q-banner>
+
+                      <div class="row items-center q-col-gutter-md">
+                        <div class="col-12 col-sm-8">
+                          <q-file v-model="facturacion.file" label="Seleccionar Nueva Factura (PDF)" outlined dense
+                            accept=".pdf" max-file-size="2097152" @rejected="onRejected">
+                            <template v-slot:prepend>
+                              <q-icon name="attach_file" />
+                            </template>
+                          </q-file>
+                          <div class="text-caption text-grey-7 q-mt-xs">
+                            Formato PDF, máx 2MB
+                          </div>
+                        </div>
+                        <div class="col-12 col-sm-4">
+                          <q-btn label="Reemplazar Factura" color="warning" icon="sync" class="full-width"
+                            @click="confirmReplaceFactura(facturacion)" :loading="uploading[facturacion.id]"
+                            :disable="!facturacion.file" />
+                        </div>
+                      </div>
+                    </q-card-section>
+                  </q-card>
+                </div>
+
+                <div v-else-if="facturacion.estado_subida === 'APROBADO'">
                   <q-card flat bordered class="bg-green-1 border-green">
                     <q-card-section class="row items-center justify-between">
                       <div class="row items-center">
                         <q-icon name="check_circle" color="positive" size="32px" class="q-mr-md" />
                         <div>
                           <div class="text-subtitle1 text-weight-bold text-positive">
-                            {{ facturacion.estado_subida === 'APROBADO' ? 'Factura Aprobada'
-                              :
-                              'Factura Subida Correctamente' }}
+                            Factura Aprobada
                           </div>
                           <div class="text-caption text-grey-8">
-                            Registrada el {{ new
-                              Date(facturacion.fecha_subida).toLocaleDateString() }}
+                            Registrada el {{ new Date(facturacion.fecha_subida).toLocaleDateString() }}
+                          </div>
+                          <div class="text-caption text-positive q-mt-xs">
+                            <q-icon name="lock" size="xs" /> No se puede modificar una factura aprobada
                           </div>
                         </div>
                       </div>
@@ -229,6 +279,26 @@ export default {
       }
     }
 
+    const confirmReplaceFactura = (facturacion) => {
+      $q.dialog({
+        title: 'Confirmar Reemplazo',
+        message: '¿Está seguro de que desea reemplazar su factura actual? La factura anterior será eliminada y deberá esperar una nueva revisión.',
+        cancel: {
+          label: 'Cancelar',
+          color: 'grey',
+          flat: true
+        },
+        ok: {
+          label: 'Sí, Reemplazar',
+          color: 'warning',
+          flat: true
+        },
+        persistent: true
+      }).onOk(() => {
+        uploadFactura(facturacion)
+      })
+    }
+
     const onRejected = () => {
       $q.notify({
         type: 'negative',
@@ -251,6 +321,7 @@ export default {
       uploading,
       searchByCI,
       uploadFactura,
+      confirmReplaceFactura,
       onRejected,
       viewFactura: (facturacion) => {
         if (!facturacion.factura_path) return
