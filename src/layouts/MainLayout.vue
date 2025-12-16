@@ -78,6 +78,16 @@
             </q-item-section>
           </q-item>
 
+          <q-item clickable v-ripple to="/docentes" exact-active-class="bg-primary text-white"
+            class="q-mx-sm q-mb-xs rounded-borders">
+            <q-item-section avatar>
+              <q-icon name="person" />
+            </q-item-section>
+            <q-item-section>
+              <q-item-label>Docentes</q-item-label>
+            </q-item-section>
+          </q-item>
+
           <q-item clickable v-ripple to="/upload" exact-active-class="bg-primary text-white"
             class="q-mx-sm q-mb-xs rounded-borders">
             <q-item-section avatar>
