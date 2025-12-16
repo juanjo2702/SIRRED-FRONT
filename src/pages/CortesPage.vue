@@ -62,6 +62,15 @@
                             class="q-mb-md" :rules="[val => !!val || 'Requerido']" />
                         <q-input v-model="form.fecha_fin" label="Fecha de Fin" type="date" outlined dense
                             class="q-mb-md" />
+
+                        <q-separator class="q-mb-md" />
+                        <div class="text-subtitle2 q-mb-sm">Periodo de Facturación</div>
+
+                        <q-input v-model="form.fecha_inicio_facturacion" label="Fecha Inicio Facturación" type="date" outlined dense
+                            class="q-mb-md" hint="Fecha desde la cual los docentes pueden subir facturas" />
+                        <q-input v-model="form.fecha_fin_facturacion" label="Fecha Fin Facturación" type="date" outlined dense
+                            class="q-mb-md" hint="Último día para subir facturas (después de esta fecha quedarán como rezagados)" />
+
                         <q-toggle v-model="form.estado" label="Activar este corte" color="positive" class="q-mb-md" />
                         <q-banner v-if="form.estado" class="bg-warning text-white q-mb-md">
                             <template v-slot:avatar>
@@ -95,12 +104,19 @@ export default {
         const saving = ref(false)
         const showDialog = ref(false)
         const editMode = ref(false)
-        const form = ref({ nombre: '', fecha_inicio: '', fecha_fin: '', estado: false })
+        const form = ref({ nombre: '', fecha_inicio: '', fecha_fin: '', estado: false, fecha_inicio_facturacion: '', fecha_fin_facturacion: '' })
         const searchQuery = ref('')
 
         const formatDate = (dateString) => {
             if (!dateString) return ''
-            const date = new Date(dateString + 'T00:00:00')
+            // Handle both formats: "2025-11-19" and "2025-11-19T04:00:00.000000Z"
+            let date
+            if (dateString.includes('T')) {
+                date = new Date(dateString)
+            } else {
+                date = new Date(dateString + 'T00:00:00')
+            }
+            if (isNaN(date.getTime())) return ''
             const day = String(date.getDate()).padStart(2, '0')
             const month = String(date.getMonth() + 1).padStart(2, '0')
             const year = date.getFullYear()
@@ -124,6 +140,15 @@ export default {
                 align: 'left',
                 sortable: true,
                 format: val => formatDate(val)
+            },
+            {
+                name: 'periodo_facturacion',
+                label: 'Periodo Facturación',
+                align: 'left',
+                format: (val, row) => {
+                    if (!row.fecha_inicio_facturacion || !row.fecha_fin_facturacion) return 'No definido'
+                    return `${formatDate(row.fecha_inicio_facturacion)} - ${formatDate(row.fecha_fin_facturacion)}`
+                }
             },
             { name: 'estado', label: 'Estado', field: 'estado', align: 'center' },
             { name: 'actions', label: 'Acciones', align: 'center' }
@@ -155,12 +180,28 @@ export default {
             }
         }
 
+        // Helper to format date for input[type="date"]
+        const formatDateForInput = (dateString) => {
+            if (!dateString) return ''
+            // Handle ISO format with time
+            const date = new Date(dateString)
+            if (isNaN(date.getTime())) return ''
+            return date.toISOString().split('T')[0]
+        }
+
         const openDialog = (corte = null) => {
             if (corte) {
-                form.value = { ...corte, estado: Boolean(corte.estado) }
+                form.value = {
+                    ...corte,
+                    estado: Boolean(corte.estado),
+                    fecha_inicio: formatDateForInput(corte.fecha_inicio),
+                    fecha_fin: formatDateForInput(corte.fecha_fin),
+                    fecha_inicio_facturacion: formatDateForInput(corte.fecha_inicio_facturacion),
+                    fecha_fin_facturacion: formatDateForInput(corte.fecha_fin_facturacion)
+                }
                 editMode.value = true
             } else {
-                form.value = { nombre: '', fecha_inicio: '', fecha_fin: '', estado: false }
+                form.value = { nombre: '', fecha_inicio: '', fecha_fin: '', estado: false, fecha_inicio_facturacion: '', fecha_fin_facturacion: '' }
                 editMode.value = false
             }
             showDialog.value = true

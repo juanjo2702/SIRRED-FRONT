@@ -38,15 +38,25 @@
                     </q-badge>
                   </div>
                   <div class="text-caption q-mt-xs text-italic opacity-80">
-                    Periodo: {{ new Date(searchResult.corte_activo.fecha_inicio +
-                      'T00:00:00').toLocaleDateString() }} -
-                    {{ new Date(searchResult.corte_activo.fecha_fin +
-                      'T00:00:00').toLocaleDateString() }}
+                    Periodo: {{ formatDateDisplay(searchResult.corte_activo.fecha_inicio) }} -
+                    {{ formatDateDisplay(searchResult.corte_activo.fecha_fin) }}
                   </div>
                 </div>
               </div>
             </q-card-section>
           </q-card>
+
+          <!-- Banner Periodo de Facturación -->
+          <q-banner v-if="searchResult.periodo_facturacion?.fecha_inicio" rounded class="q-mb-md" :class="getPeriodoBannerClass()">
+            <template v-slot:avatar>
+              <q-icon :name="getPeriodoIcon()" />
+            </template>
+            <div class="text-weight-bold">{{ getPeriodoTitle() }}</div>
+            <div>Periodo: {{ formatDate(searchResult.periodo_facturacion.fecha_inicio) }} - {{ formatDate(searchResult.periodo_facturacion.fecha_fin) }}</div>
+            <div v-if="searchResult.periodo_facturacion.estado === 'abierto' && searchResult.periodo_facturacion.dias_restantes !== null" class="text-caption q-mt-xs">
+              <q-icon name="schedule" size="xs" /> {{ searchResult.periodo_facturacion.dias_restantes }} día(s) restantes para subir su factura
+            </div>
+          </q-banner>
 
           <div v-for="facturacion in searchResult.facturaciones" :key="facturacion.id" class="q-mb-md">
             <q-card bordered>
@@ -71,18 +81,54 @@
               </q-card-section>
 
               <q-card-section v-if="facturacion.tipo_contrato === 'FACTURACION'">
-                <div v-if="!facturacion.estado_subida || facturacion.estado_subida === 'DENEGADO'">
+                <!-- Estado REZAGADO -->
+                <q-banner v-if="facturacion.estado_subida === 'REZAGADO'" rounded class="bg-orange-1 text-orange-9 q-mb-md">
+                  <template v-slot:avatar>
+                    <q-icon name="schedule" color="orange" />
+                  </template>
+                  <div class="text-weight-bold">Factura Rezagada</div>
+                  <div>No subió su factura dentro del periodo establecido. Aún puede subirla ahora.</div>
+                </q-banner>
+
+                <!-- Periodo Cerrado (no es rezagado) -->
+                <q-banner v-if="searchResult.periodo_facturacion?.estado === 'cerrado' && !facturacion.estado_subida" rounded class="bg-red-1 text-red-9 q-mb-md">
+                  <template v-slot:avatar>
+                    <q-icon name="block" color="red" />
+                  </template>
+                  <div class="text-weight-bold">Periodo de Facturación Cerrado</div>
+                  <div>El plazo para subir facturas ha terminado. Contacte al administrador.</div>
+                </q-banner>
+
+                <div v-if="(!facturacion.estado_subida && searchResult.periodo_facturacion?.estado !== 'cerrado') || facturacion.estado_subida === 'DENEGADO' || facturacion.estado_subida === 'REZAGADO' || facturacion.estado_subida === 'RECHAZADO'">
+                  <!-- Banner para DENEGADO (administrador) -->
                   <q-banner v-if="facturacion.estado_subida === 'DENEGADO'" rounded
                     class="bg-red-1 text-red-9 q-mb-md border-red">
                     <template v-slot:avatar>
                       <q-icon name="error" color="red" />
                     </template>
-                    <div class="text-weight-bold">Factura Denegada</div>
+                    <div class="text-weight-bold">Factura Denegada por Administrador</div>
                     <div>Su factura fue denegada. Por favor, revise los requisitos y suba una nueva.
                     </div>
                     <div class="text-caption q-mt-xs" v-if="facturacion.fecha_subida">
                       Fecha de subida anterior: {{ new
                         Date(facturacion.fecha_subida).toLocaleDateString() }}
+                    </div>
+                  </q-banner>
+
+                  <!-- Banner para RECHAZADO (validación automática) -->
+                  <q-banner v-if="facturacion.estado_subida === 'RECHAZADO'" rounded
+                    class="bg-orange-1 text-orange-9 q-mb-md">
+                    <template v-slot:avatar>
+                      <q-icon name="warning" color="orange" />
+                    </template>
+                    <div class="text-weight-bold">Factura Rechazada - Errores de Validación</div>
+                    <div class="q-mt-sm" v-if="facturacion.errores_validacion?.length">
+                      <div v-for="(error, idx) in facturacion.errores_validacion" :key="idx" class="q-mb-xs">
+                        • {{ error }}
+                      </div>
+                    </div>
+                    <div class="text-caption q-mt-sm">
+                      <q-icon name="refresh" size="xs" /> Intentos: {{ facturacion.intentos_validacion || 0 }} / 3
                     </div>
                   </q-banner>
 
@@ -261,19 +307,62 @@ export default {
         const formData = new FormData()
         formData.append('factura', facturacion.file)
 
-        await api.post(`/public/facturaciones/${facturacion.id}/upload`, formData, {
+        const response = await api.post(`/public/facturaciones/${facturacion.id}/upload`, formData, {
           headers: { 'Content-Type': 'multipart/form-data' }
         })
 
-        $q.notify({ type: 'positive', message: 'Factura subida correctamente' })
+        // Verificar el estado de la respuesta
+        const data = response.data
+
+        if (data.estado === 'APROBADO') {
+          $q.notify({
+            type: 'positive',
+            message: data.message,
+            timeout: 5000
+          })
+        } else if (data.estado === 'SUBIDA' && data.validacion?.errores?.length > 0) {
+          // Pendiente de revisión manual
+          $q.dialog({
+            title: '⚠️ Factura en Revisión',
+            message: data.message + '\n\nSu factura será revisada manualmente por un administrador.',
+            ok: 'Entendido'
+          })
+        } else {
+          $q.notify({
+            type: 'positive',
+            message: data.message || 'Factura subida correctamente',
+            timeout: 3000
+          })
+        }
 
         // Refresh search
         searchByCI(true)
       } catch (error) {
-        $q.notify({
-          type: 'negative',
-          message: error.response?.data?.message || 'Error al subir factura'
-        })
+        const errorData = error.response?.data
+
+        // Error 422 = Error de validación (factura rechazada)
+        if (error.response?.status === 422 && errorData?.validacion) {
+          const errores = errorData.validacion.errores || []
+          const intentosRestantes = errorData.validacion.intentos_restantes || 0
+
+          $q.dialog({
+            title: '❌ Factura Rechazada',
+            message: `Su factura no cumple con los requisitos:\n\n${errores.map((e, i) => `${i+1}. ${e}`).join('\n')}\n\n` +
+                     (intentosRestantes > 0
+                       ? `Le quedan ${intentosRestantes} intento(s). Por favor, corrija su factura y vuelva a subirla.`
+                       : 'Ha agotado sus intentos. La factura será enviada a revisión manual.'),
+            html: true,
+            ok: {
+              label: 'Entendido',
+              color: 'primary'
+            }
+          })
+        } else {
+          $q.notify({
+            type: 'negative',
+            message: error.response?.data?.message || 'Error al subir factura'
+          })
+        }
       } finally {
         uploading.value[facturacion.id] = false
       }
@@ -313,6 +402,51 @@ export default {
       }
     })
 
+    const formatDate = (dateString) => {
+      if (!dateString) return ''
+      let date
+      if (dateString.includes('T')) {
+        date = new Date(dateString)
+      } else {
+        date = new Date(dateString + 'T00:00:00')
+      }
+      if (isNaN(date.getTime())) return ''
+      return date.toLocaleDateString('es-BO')
+    }
+
+    const formatDateDisplay = (dateString) => {
+      if (!dateString) return ''
+      let date
+      if (typeof dateString === 'string' && dateString.includes('T')) {
+        date = new Date(dateString)
+      } else {
+        date = new Date(dateString + 'T00:00:00')
+      }
+      if (isNaN(date.getTime())) return ''
+      return date.toLocaleDateString('es-BO')
+    }
+
+    const getPeriodoBannerClass = () => {
+      const estado = searchResult.value?.periodo_facturacion?.estado
+      if (estado === 'abierto') return 'bg-green-1 text-green-9'
+      if (estado === 'cerrado') return 'bg-red-1 text-red-9'
+      return 'bg-grey-3 text-grey-8'
+    }
+
+    const getPeriodoIcon = () => {
+      const estado = searchResult.value?.periodo_facturacion?.estado
+      if (estado === 'abierto') return 'check_circle'
+      if (estado === 'cerrado') return 'block'
+      return 'schedule'
+    }
+
+    const getPeriodoTitle = () => {
+      const estado = searchResult.value?.periodo_facturacion?.estado
+      if (estado === 'abierto') return 'Periodo de Facturación Abierto'
+      if (estado === 'cerrado') return 'Periodo de Facturación Cerrado'
+      return 'Periodo de Facturación Pendiente'
+    }
+
     return {
       ci,
       searching,
@@ -323,6 +457,11 @@ export default {
       uploadFactura,
       confirmReplaceFactura,
       onRejected,
+      formatDate,
+      formatDateDisplay,
+      getPeriodoBannerClass,
+      getPeriodoIcon,
+      getPeriodoTitle,
       viewFactura: (facturacion) => {
         if (!facturacion.factura_path) return
         // Get base URL and ensure it doesn't end with /api
