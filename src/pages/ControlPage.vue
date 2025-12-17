@@ -145,6 +145,12 @@
               <q-tooltip>Descargar Factura</q-tooltip>
             </q-btn>
 
+            <q-btn v-if="props.row.estado_subida === 'APROBADO' && props.row.dato_factura?.qr_url"
+              flat dense round color="info" icon="qr_code_2"
+              @click="openQrUrl(props.row.dato_factura.qr_url)">
+              <q-tooltip>Ver Enlace QR</q-tooltip>
+            </q-btn>
+
             <q-btn v-if="props.row.estado_subida === 'SUBIDA'" flat dense round color="positive" icon="check_circle"
               @click="approveFactura(props.row)">
               <q-tooltip>Aprobar Factura</q-tooltip>
@@ -393,6 +399,24 @@ export default {
       })
     }
 
+    const openQrUrl = (url) => {
+      $q.dialog({
+        title: 'Enlace del Código QR',
+        message: url,
+        html: true,
+        ok: {
+          label: 'Abrir Enlace',
+          color: 'primary'
+        },
+        cancel: {
+          label: 'Cerrar',
+          flat: true
+        }
+      }).onOk(() => {
+        window.open(url, '_blank')
+      })
+    }
+
     const exportToExcel = async () => {
       try {
         const token = localStorage.getItem('token')
@@ -535,6 +559,7 @@ export default {
       downloadFactura,
       approveFactura,
       denyFactura,
+      openQrUrl,
       exportToExcel,
       editDialog,
       isBulkEdit,
