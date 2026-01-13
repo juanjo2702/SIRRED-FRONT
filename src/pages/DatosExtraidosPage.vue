@@ -21,16 +21,8 @@
       <q-card-section>
         <div class="row q-col-gutter-md">
           <div class="col-12 col-sm-6 col-md-2">
-            <q-select
-              v-model="selectedCorte"
-              :options="cortes"
-              option-label="nombre"
-              option-value="id"
-              label="Corte"
-              outlined
-              dense
-              @update:model-value="onCorteChange"
-            >
+            <q-select v-model="selectedCorte" :options="cortes" option-label="nombre" option-value="id" label="Corte"
+              outlined dense @update:model-value="onCorteChange">
               <template v-slot:prepend>
                 <q-icon name="event" />
               </template>
@@ -38,17 +30,8 @@
           </div>
 
           <div class="col-12 col-sm-6 col-md-2">
-            <q-select
-              v-model="selectedSede"
-              :options="sedeOptions"
-              label="Sede"
-              outlined
-              dense
-              emit-value
-              map-options
-              clearable
-              @update:model-value="onSedeChange"
-            >
+            <q-select v-model="selectedSede" :options="sedeOptions" label="Sede" outlined dense emit-value map-options
+              clearable @update:model-value="onSedeChange">
               <template v-slot:prepend>
                 <q-icon name="location_on" />
               </template>
@@ -56,17 +39,8 @@
           </div>
 
           <div class="col-12 col-sm-6 col-md-2">
-            <q-select
-              v-model="selectedCarrera"
-              :options="carreraOptions"
-              label="Carrera"
-              outlined
-              dense
-              emit-value
-              map-options
-              clearable
-              :disable="!selectedSede"
-            >
+            <q-select v-model="selectedCarrera" :options="carreraOptions" label="Carrera" outlined dense emit-value
+              map-options clearable :disable="!selectedSede">
               <template v-slot:prepend>
                 <q-icon name="school" />
               </template>
@@ -74,13 +48,8 @@
           </div>
 
           <div class="col-12 col-sm-6 col-md-4">
-            <q-input
-              v-model="searchQuery"
-              outlined
-              dense
-              placeholder="Buscar por docente, NIT o razón social..."
-              clearable
-            >
+            <q-input v-model="searchQuery" outlined dense placeholder="Buscar por docente, NIT o razón social..."
+              clearable>
               <template v-slot:prepend>
                 <q-icon name="search" />
               </template>
@@ -143,28 +112,16 @@
 
     <!-- Botón de Exportación -->
     <div class="row justify-end q-mb-md">
-      <q-btn
-        color="positive"
-        icon="download"
-        label="Exportar a Excel"
-        unelevated
-        @click="exportDatosExtraidos"
-        :disable="datos.length === 0"
-      >
-        <q-tooltip>Descargar datos extraídos (FECHA, NroFACTURA, NIT, CUF, NOMBRE, Monto)</q-tooltip>
+      <q-btn color="positive" icon="download" label="Exportar Aprobados" unelevated @click="exportDatosExtraidos"
+        :disable="datos.length === 0">
+        <q-tooltip>Solo exporta facturas con estado APROBADO (FECHA, NroFACTURA, NIT, CUF, NOMBRE, Monto)</q-tooltip>
       </q-btn>
     </div>
 
     <!-- Tabla -->
     <q-card flat bordered class="shadow-2">
-      <q-table
-        :rows="filteredDatos"
-        :columns="columns"
-        row-key="id"
-        :loading="loading"
-        flat
-        :rows-per-page-options="[10, 25, 50]"
-      >
+      <q-table :rows="filteredDatos" :columns="columns" row-key="id" :loading="loading" flat
+        :rows-per-page-options="[10, 25, 50]">
         <!-- Docente -->
         <template v-slot:body-cell-docente="props">
           <q-td :props="props">
@@ -182,12 +139,8 @@
         <!-- Datos Extraídos -->
         <template v-slot:body-cell-nit_emisor="props">
           <q-td :props="props">
-            <q-chip
-              :color="props.row.datos_extraidos?.nit_emisor ? 'primary' : 'grey'"
-              text-color="white"
-              size="sm"
-              dense
-            >
+            <q-chip :color="props.row.datos_extraidos?.nit_emisor ? 'primary' : 'grey'" text-color="white" size="sm"
+              dense>
               {{ props.row.datos_extraidos?.nit_emisor || 'N/A' }}
             </q-chip>
           </q-td>
@@ -226,11 +179,8 @@
                 <div class="text-caption text-grey-6">Excel</div>
                 <div class="text-weight-medium">Bs {{ props.row.monto_excel }}</div>
               </div>
-              <q-icon
-                :name="montosCoinciden(props.row) ? 'check_circle' : 'warning'"
-                :color="montosCoinciden(props.row) ? 'positive' : 'warning'"
-                size="sm"
-              />
+              <q-icon :name="montosCoinciden(props.row) ? 'check_circle' : 'warning'"
+                :color="montosCoinciden(props.row) ? 'positive' : 'warning'" size="sm" />
               <div class="column items-start q-ml-sm">
                 <div class="text-caption text-grey-6">PDF</div>
                 <div class="text-weight-medium">
@@ -244,9 +194,7 @@
         <!-- Estado -->
         <template v-slot:body-cell-estado="props">
           <q-td :props="props">
-            <q-badge
-              :color="getEstadoColor(props.row.estado_subida)"
-            >
+            <q-badge :color="getEstadoColor(props.row.estado_subida)">
               {{ props.row.estado_subida || 'Pendiente' }}
             </q-badge>
           </q-td>
@@ -255,24 +203,10 @@
         <!-- Acciones -->
         <template v-slot:body-cell-actions="props">
           <q-td :props="props">
-            <q-btn
-              flat
-              dense
-              round
-              color="primary"
-              icon="visibility"
-              @click="verFactura(props.row)"
-            >
+            <q-btn flat dense round color="primary" icon="visibility" @click="verFactura(props.row)">
               <q-tooltip>Ver Factura PDF</q-tooltip>
             </q-btn>
-            <q-btn
-              flat
-              dense
-              round
-              color="info"
-              icon="info"
-              @click="verDetalles(props.row)"
-            >
+            <q-btn flat dense round color="info" icon="info" @click="verDetalles(props.row)">
               <q-tooltip>Ver Detalles Completos</q-tooltip>
             </q-btn>
           </q-td>
@@ -292,27 +226,15 @@
             Docentes que no subieron su factura dentro del periodo de facturación establecido
           </div>
         </div>
-        <q-btn
-          color="orange"
-          icon="download"
-          label="Exportar Rezagados"
-          unelevated
-          @click="exportRezagados"
-          :disable="filteredRezagados.length === 0"
-        >
-          <q-tooltip>Descargar lista de rezagados (CI, Nombre, Sede, Carrera, Monto)</q-tooltip>
+        <q-btn color="orange" icon="download" label="Exportar Rezagados Aprobados" unelevated @click="exportRezagados"
+          :disable="filteredRezagados.length === 0">
+          <q-tooltip>Solo exporta rezagados con estado APROBADO</q-tooltip>
         </q-btn>
       </div>
 
       <q-card flat bordered class="shadow-2">
-        <q-table
-          :rows="filteredRezagados"
-          :columns="rezagadosColumns"
-          row-key="id"
-          :loading="loadingRezagados"
-          flat
-          :rows-per-page-options="[10, 25, 50]"
-        >
+        <q-table :rows="filteredRezagados" :columns="rezagadosColumns" row-key="id" :loading="loadingRezagados" flat
+          :rows-per-page-options="[10, 25, 50]">
           <template v-slot:body-cell-docente="props">
             <q-td :props="props">
               <div class="text-weight-medium">
@@ -366,11 +288,8 @@
                     Bs {{ props.row.monto_excel }}
                   </div>
                 </div>
-                <q-icon
-                  :name="montosCoinciden(props.row) ? 'check_circle' : 'warning'"
-                  :color="montosCoinciden(props.row) ? 'positive' : 'warning'"
-                  size="sm"
-                />
+                <q-icon :name="montosCoinciden(props.row) ? 'check_circle' : 'warning'"
+                  :color="montosCoinciden(props.row) ? 'positive' : 'warning'" size="sm" />
                 <div class="column items-start q-ml-sm">
                   <div class="text-caption text-grey-6">PDF</div>
                   <div class="text-weight-medium">
@@ -384,14 +303,7 @@
           <!-- Acciones -->
           <template v-slot:body-cell-actions="props">
             <q-td :props="props">
-              <q-btn
-                flat
-                dense
-                round
-                color="primary"
-                icon="visibility"
-                @click="verFactura(props.row)"
-              >
+              <q-btn flat dense round color="primary" icon="visibility" @click="verFactura(props.row)">
                 <q-tooltip>Ver Factura PDF</q-tooltip>
               </q-btn>
             </q-td>
@@ -506,23 +418,15 @@
                 <q-avatar color="primary" text-color="white" icon="table_chart" />
                 Excel: Bs {{ selectedRow.monto_excel }}
               </q-chip>
-              <q-icon
-                :name="montosCoinciden(selectedRow) ? 'check_circle' : 'warning'"
-                :color="montosCoinciden(selectedRow) ? 'positive' : 'warning'"
-                size="md"
-                class="q-mx-md"
-              />
+              <q-icon :name="montosCoinciden(selectedRow) ? 'check_circle' : 'warning'"
+                :color="montosCoinciden(selectedRow) ? 'positive' : 'warning'" size="md" class="q-mx-md" />
               <q-chip color="grey-3" text-color="dark" size="lg">
                 <q-avatar color="secondary" text-color="white" icon="picture_as_pdf" />
                 PDF: Bs {{ selectedRow.datos_extraidos?.monto_extraido || 'N/A' }}
               </q-chip>
             </div>
 
-            <q-banner
-              v-if="!montosCoinciden(selectedRow)"
-              class="bg-warning text-white"
-              rounded
-            >
+            <q-banner v-if="!montosCoinciden(selectedRow)" class="bg-warning text-white" rounded>
               <template v-slot:avatar>
                 <q-icon name="warning" />
               </template>
@@ -768,6 +672,14 @@ export default {
           corte_id: selectedCorte.value.id
         }
 
+        // Agregar filtros de sede y carrera si están seleccionados
+        if (selectedSede.value) {
+          params.sede_nombre = selectedSede.value
+        }
+        if (selectedCarrera.value) {
+          params.carrera_nombre = selectedCarrera.value
+        }
+
         const response = await api.get('/facturaciones/export-datos-extraidos', {
           params,
           headers: { Authorization: `Bearer ${token}` },
@@ -779,13 +691,20 @@ export default {
         const link = document.createElement('a')
         link.href = url
 
-        // Extract filename from response headers or use default
-        const contentDisposition = response.headers['content-disposition']
-        let filename = 'DatosFacturas_Export.xlsx'
-        if (contentDisposition) {
-          const filenameMatch = contentDisposition.match(/filename="?(.+)"?/)
-          if (filenameMatch) filename = filenameMatch[1]
+        // Generar nombre descriptivo del archivo
+        const corteName = selectedCorte.value?.nombre?.replace(/\s+/g, '_') || 'Corte'
+        const date = new Date().toISOString().split('T')[0]
+        let filenameParts = ['Aprobados', corteName]
+
+        if (selectedSede.value) {
+          filenameParts.push(selectedSede.value.replace(/\s+/g, '_'))
         }
+        if (selectedCarrera.value) {
+          filenameParts.push(selectedCarrera.value.replace(/\s+/g, '_'))
+        }
+
+        filenameParts.push(date)
+        const filename = filenameParts.join('_') + '.xlsx'
 
         link.setAttribute('download', filename)
         document.body.appendChild(link)
@@ -806,6 +725,14 @@ export default {
           corte_id: selectedCorte.value.id
         }
 
+        // Agregar filtros de sede y carrera si están seleccionados
+        if (selectedSede.value) {
+          params.sede_nombre = selectedSede.value
+        }
+        if (selectedCarrera.value) {
+          params.carrera_nombre = selectedCarrera.value
+        }
+
         const response = await api.get('/facturaciones/export-datos-rezagados', {
           params,
           headers: { Authorization: `Bearer ${token}` },
@@ -817,13 +744,20 @@ export default {
         const link = document.createElement('a')
         link.href = url
 
-        // Extract filename from response headers or use default
-        const contentDisposition = response.headers['content-disposition']
-        let filename = 'DatosRezagados_Export.xlsx'
-        if (contentDisposition) {
-          const filenameMatch = contentDisposition.match(/filename="?(.+)"?/)
-          if (filenameMatch) filename = filenameMatch[1]
+        // Generar nombre descriptivo del archivo
+        const corteName = selectedCorte.value?.nombre?.replace(/\s+/g, '_') || 'Corte'
+        const date = new Date().toISOString().split('T')[0]
+        let filenameParts = ['Rezagados_Aprobados', corteName]
+
+        if (selectedSede.value) {
+          filenameParts.push(selectedSede.value.replace(/\s+/g, '_'))
         }
+        if (selectedCarrera.value) {
+          filenameParts.push(selectedCarrera.value.replace(/\s+/g, '_'))
+        }
+
+        filenameParts.push(date)
+        const filename = filenameParts.join('_') + '.xlsx'
 
         link.setAttribute('download', filename)
         document.body.appendChild(link)
