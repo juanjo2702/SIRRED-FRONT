@@ -47,14 +47,20 @@
           </q-card>
 
           <!-- Banner Periodo de Facturación -->
-          <q-banner v-if="searchResult.periodo_facturacion?.fecha_inicio" rounded class="q-mb-md" :class="getPeriodoBannerClass()">
+          <q-banner v-if="searchResult.periodo_facturacion?.fecha_inicio" rounded class="q-mb-md"
+            :class="getPeriodoBannerClass()">
             <template v-slot:avatar>
               <q-icon :name="getPeriodoIcon()" />
             </template>
             <div class="text-weight-bold">{{ getPeriodoTitle() }}</div>
-            <div>Periodo: {{ formatDate(searchResult.periodo_facturacion.fecha_inicio) }} - {{ formatDate(searchResult.periodo_facturacion.fecha_fin) }}</div>
-            <div v-if="searchResult.periodo_facturacion.estado === 'abierto' && searchResult.periodo_facturacion.dias_restantes !== null" class="text-caption q-mt-xs">
-              <q-icon name="schedule" size="xs" /> {{ searchResult.periodo_facturacion.dias_restantes }} día(s) restantes para subir su factura
+            <div>Periodo: {{ formatDate(searchResult.periodo_facturacion.fecha_inicio) }} - {{
+              formatDate(searchResult.periodo_facturacion.fecha_fin) }}</div>
+            <div
+              v-if="searchResult.periodo_facturacion.estado === 'abierto' && searchResult.periodo_facturacion.dias_restantes !== null"
+              class="text-caption q-mt-xs">
+              <q-icon name="schedule" size="xs" /> {{ searchResult.periodo_facturacion.dias_restantes }} día(s)
+              restantes para subir
+              su factura
             </div>
           </q-banner>
 
@@ -82,7 +88,8 @@
 
               <q-card-section v-if="facturacion.tipo_contrato === 'FACTURACION'">
                 <!-- Estado REZAGADO -->
-                <q-banner v-if="facturacion.estado_subida === 'REZAGADO'" rounded class="bg-orange-1 text-orange-9 q-mb-md">
+                <q-banner v-if="facturacion.estado_subida === 'REZAGADO'" rounded
+                  class="bg-orange-1 text-orange-9 q-mb-md">
                   <template v-slot:avatar>
                     <q-icon name="schedule" color="orange" />
                   </template>
@@ -91,7 +98,8 @@
                 </q-banner>
 
                 <!-- Periodo Cerrado (no es rezagado) -->
-                <q-banner v-if="searchResult.periodo_facturacion?.estado === 'cerrado' && !facturacion.estado_subida" rounded class="bg-red-1 text-red-9 q-mb-md">
+                <q-banner v-if="searchResult.periodo_facturacion?.estado === 'cerrado' && !facturacion.estado_subida"
+                  rounded class="bg-red-1 text-red-9 q-mb-md">
                   <template v-slot:avatar>
                     <q-icon name="block" color="red" />
                   </template>
@@ -99,7 +107,8 @@
                   <div>El plazo para subir facturas ha terminado. Contacte al administrador.</div>
                 </q-banner>
 
-                <div v-if="(!facturacion.estado_subida && searchResult.periodo_facturacion?.estado !== 'cerrado') || facturacion.estado_subida === 'DENEGADO' || facturacion.estado_subida === 'REZAGADO' || facturacion.estado_subida === 'RECHAZADO'">
+                <div
+                  v-if="(!facturacion.estado_subida && searchResult.periodo_facturacion?.estado !== 'cerrado') || facturacion.estado_subida === 'DENEGADO' || facturacion.estado_subida === 'REZAGADO' || facturacion.estado_subida === 'RECHAZADO'">
                   <!-- Banner para DENEGADO (administrador) -->
                   <q-banner v-if="facturacion.estado_subida === 'DENEGADO'" rounded
                     class="bg-red-1 text-red-9 q-mb-md border-red">
@@ -122,13 +131,36 @@
                       <q-icon name="warning" color="orange" />
                     </template>
                     <div class="text-weight-bold">Factura Rechazada - Errores de Validación</div>
-                    <div class="q-mt-sm" v-if="facturacion.errores_validacion?.length">
+
+                    <!-- Feedback Detallado (persistente) -->
+                    <div class="q-mt-sm"
+                      v-if="facturacion.errores_validacion?.length && typeof facturacion.errores_validacion[0] === 'object'">
+                      <q-list dense bordered separator class="bg-white rounded-borders q-my-sm">
+                        <q-item v-for="(detalle, idx) in facturacion.errores_validacion" :key="idx"
+                          :class="detalle.estado === 'ok' ? 'bg-green-1' : 'bg-red-1'">
+                          <q-item-section avatar style="min-width: 30px; padding-right: 0;">
+                            <q-icon :name="detalle.estado === 'ok' ? 'check_circle' : 'cancel'"
+                              :color="detalle.estado === 'ok' ? 'positive' : 'negative'" size="xs" />
+                          </q-item-section>
+                          <q-item-section>
+                            <q-item-label :class="detalle.estado === 'ok' ? 'text-positive' : 'text-negative'"
+                              class="text-weight-bold text-caption">{{ detalle.titulo }}</q-item-label>
+                            <q-item-label caption style="font-size: 11px; line-height: 1.2;">{{ detalle.mensaje
+                            }}</q-item-label>
+                          </q-item-section>
+                        </q-item>
+                      </q-list>
+                    </div>
+
+                    <!-- Fallback para errores antiguos (strings simples) -->
+                    <div class="q-mt-sm" v-else-if="facturacion.errores_validacion?.length">
                       <div v-for="(error, idx) in facturacion.errores_validacion" :key="idx" class="q-mb-xs">
                         • {{ error }}
                       </div>
                     </div>
+
                     <div class="text-caption q-mt-sm">
-                      <q-icon name="refresh" size="xs" /> Intentos: {{ facturacion.intentos_validacion || 0 }} / 3
+                      <q-icon name="info" size="xs" /> Por favor, corrija los errores y vuelva a subir su factura.
                     </div>
                   </q-banner>
 
@@ -177,7 +209,8 @@
                           <q-icon name="info" />
                         </template>
                         <div class="text-weight-bold">¿Necesita reemplazar su factura?</div>
-                        <div class="text-caption">Si detectó un error, puede subir una nueva factura. La anterior será reemplazada.</div>
+                        <div class="text-caption">Si detectó un error, puede subir una nueva factura. La anterior será
+                          reemplazada.</div>
                       </q-banner>
 
                       <div class="row items-center q-col-gutter-md">
@@ -242,6 +275,58 @@
 
 
     </q-card>
+
+    <!-- Dialogo de Rechazo de Factura -->
+    <q-dialog v-model="showRejectDialog">
+      <q-card style="min-width: 400px; max-width: 90vw;">
+        <q-card-section class="row items-center q-pb-none">
+          <div class="text-h6 text-negative row items-center">
+            <q-icon name="error_outline" class="q-mr-sm" size="28px" />
+            Factura Rechazada
+          </div>
+          <q-space />
+          <q-btn icon="close" flat round dense v-close-popup />
+        </q-card-section>
+
+        <q-card-section>
+          <div class="text-body2 q-mb-md">Su factura no cumple con uno o más requisitos. Por favor revise el detalle a
+            continuación:</div>
+
+          <q-list bordered separator class="rounded-borders q-mb-md">
+            <q-item v-for="(detalle, index) in rejectDetalles" :key="index"
+              :class="detalle.estado === 'ok' ? 'bg-green-1' : 'bg-red-1'">
+              <q-item-section avatar>
+                <q-icon :name="detalle.estado === 'ok' ? 'check_circle' : 'cancel'"
+                  :color="detalle.estado === 'ok' ? 'positive' : 'negative'" />
+              </q-item-section>
+              <q-item-section>
+                <q-item-label :class="detalle.estado === 'ok' ? 'text-positive' : 'text-negative'"
+                  class="text-weight-bold">{{ detalle.titulo }}</q-item-label>
+                <q-item-label caption class="text-grey-9">{{ detalle.mensaje }}</q-item-label>
+              </q-item-section>
+            </q-item>
+          </q-list>
+
+          <q-banner rounded class="bg-orange-1 text-orange-9 q-mt-md">
+            <template v-slot:avatar>
+              <q-icon name="warning" color="orange" />
+            </template>
+            <div class="text-weight-bold">Importante:</div>
+            <ul class="q-pl-md q-my-xs">
+              <li><b>NO</b> suba facturas escaneadas, fotos o capturas de pantalla.</li>
+              <li><b>SIEMPRE</b> use el archivo PDF original descargado del portal de Impuestos Nacionales o enviado a
+                su
+                correo.</li>
+              <li>Si persiste el error, verifique que su archivo no esté dañado.</li>
+            </ul>
+          </q-banner>
+        </q-card-section>
+
+        <q-card-actions align="right">
+          <q-btn flat label="Entendido, voy a corregirlo" color="primary" v-close-popup />
+        </q-card-actions>
+      </q-card>
+    </q-dialog>
   </q-page>
 </template>
 
@@ -262,6 +347,10 @@ export default {
     const searchResult = ref(null)
     const noCorteActivo = ref(false)
     const uploading = ref({})
+
+    // Dialog state
+    const showRejectDialog = ref(false)
+    const rejectDetalles = ref([])
 
     const searchByCI = async (refresh = false) => {
       searching.value = true
@@ -341,22 +430,22 @@ export default {
         const errorData = error.response?.data
 
         // Error 422 = Error de validación (factura rechazada)
+        // Error 422 = Error de validación (factura rechazada)
         if (error.response?.status === 422 && errorData?.validacion) {
-          const errores = errorData.validacion.errores || []
-          const intentosRestantes = errorData.validacion.intentos_restantes || 0
+          // Actualizar estado local para mostrar el banner de rechazo inmediatamente
+          if (errorData.facturacion) {
+            const index = searchResult.value.facturaciones.findIndex(f => f.id === facturacion.id)
+            if (index !== -1) {
+              // Mantenemos la referencia pero actualizamos propiedades para reactividad
+              Object.assign(searchResult.value.facturaciones[index], errorData.facturacion)
 
-          $q.dialog({
-            title: '❌ Factura Rechazada',
-            message: `Su factura no cumple con los requisitos:\n\n${errores.map((e, i) => `${i+1}. ${e}`).join('\n')}\n\n` +
-                     (intentosRestantes > 0
-                       ? `Le quedan ${intentosRestantes} intento(s). Por favor, corrija su factura y vuelva a subirla.`
-                       : 'Ha agotado sus intentos. La factura será enviada a revisión manual.'),
-            html: true,
-            ok: {
-              label: 'Entendido',
-              color: 'primary'
+              // Limpiamos el archivo seleccionado
+              searchResult.value.facturaciones[index].file = null
             }
-          })
+          }
+
+          rejectDetalles.value = errorData.validacion.detalles || []
+          showRejectDialog.value = true
         } else {
           $q.notify({
             type: 'negative',
@@ -462,6 +551,8 @@ export default {
       getPeriodoBannerClass,
       getPeriodoIcon,
       getPeriodoTitle,
+      showRejectDialog,
+      rejectDetalles,
       viewFactura: (facturacion) => {
         if (!facturacion.factura_path) return
         // Get base URL and ensure it doesn't end with /api
