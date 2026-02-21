@@ -339,11 +339,9 @@ export default {
     }
 
     const downloadFactura = (facturacion) => {
-      // Construct storage URL based on environment
-      const isProduction = window.location.hostname !== 'localhost'
-      const baseUrl = isProduction
-        ? 'https://api.sirred.clubatleticoimperial.com'
-        : 'http://localhost:8000'
+      // Use the API URL from env, stripping '/api' to get the base URL for storage
+      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:8000/api'
+      const baseUrl = apiUrl.replace(/\/api\/?$/, '')
       const url = `${baseUrl}/storage/${facturacion.factura_path}`
       window.open(url, '_blank')
     }
