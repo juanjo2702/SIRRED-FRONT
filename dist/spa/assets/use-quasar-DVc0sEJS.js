@@ -1,0 +1,1 @@
+import{H as e}from"./dom-B4soQMaG.js";function t(){return e(`_q_`)}export{t};
