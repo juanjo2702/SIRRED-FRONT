@@ -22,8 +22,9 @@
     "vue-router": "^4.0.12"
   },
   "devDependencies": {
-    "@quasar/app-vite": "^1.9.0",
+    "@quasar/app-vite": "^2.5.2",
     "autoprefixer": "^10.4.2",
+    "baseline-browser-mapping": "^2.10.9",
     "eslint": "^8.57.0",
     "eslint-config-prettier": "^8.1.0",
     "eslint-plugin-vue": "^9.0.0",

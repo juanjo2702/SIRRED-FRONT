@@ -25,7 +25,10 @@ const routes = [
       { path: 'carreras', component: () => import('pages/CarrerasPage.vue') },
       { path: 'upload', component: () => import('pages/UploadPage.vue') },
       { path: 'control', component: () => import('pages/ControlPage.vue') },
-      { path: 'control-afiliacion-retencion', component: () => import('pages/AffiliationRetentionPage.vue') }
+      { path: 'control-afiliacion-retencion', component: () => import('pages/AffiliationRetentionPage.vue') },
+      { path: 'cortes-practicas', component: () => import('pages/CortesPracticasPage.vue') },
+      { path: 'upload-practicas', component: () => import('pages/UploadPracticasPage.vue') },
+      { path: 'control-practicas', component: () => import('pages/ControlPracticasPage.vue') }
     ]
   },
 

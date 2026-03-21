@@ -1,8 +1,8 @@
 <template>
   <q-page padding>
     <div class="q-mb-md">
-      <div class="text-h5 text-weight-medium">Control de Facturas</div>
-      <div class="text-caption text-grey-7">Gestione y apruebe las facturas subidas por los docentes</div>
+        <div class="text-h5 text-weight-medium">Control de Facturas (Prácticas Hospitalarias)</div>
+        <div class="text-caption text-grey-7">Gestione y apruebe las facturas de prácticas subidas por los docentes</div>
     </div>
 
     <q-card class="q-mb-md shadow-2" flat bordered>
@@ -95,11 +95,10 @@
         </q-td>
       </template>
 
-      <template v-slot:body-cell-tipo_contrato="props">
+      <template v-slot:body-cell-materia_hospital="props">
         <q-td :props="props">
-          <q-badge :color="props.row.tipo_contrato === 'FACTURACION' ? 'primary' : 'grey'">
-            {{ props.row.tipo_contrato }}
-          </q-badge>
+          <div class="text-weight-bold">{{ props.row.materia_practica || '-' }}</div>
+          <div class="text-caption text-grey-7">{{ props.row.hospital_practica || '-' }}</div>
         </q-td>
       </template>
 
@@ -221,7 +220,7 @@ import { useQuasar } from 'quasar'
 import { api } from 'boot/axios'
 
 export default {
-  name: 'ControlPage',
+  name: 'ControlPracticasPage',
   setup() {
     const $q = useQuasar()
     const facturaciones = ref([])
@@ -263,9 +262,8 @@ export default {
     const columns = [
       { name: 'docente', label: 'Docente', align: 'left', sortable: true },
       { name: 'sede_carrera', label: 'Sede - Carrera', align: 'left' },
-      { name: 'tipo_contrato', label: 'Tipo', field: 'tipo_contrato', align: 'center' },
+      { name: 'materia_hospital', label: 'Materia / Hospital', align: 'left' },
       { name: 'monto', label: 'Monto', field: 'monto', align: 'right', format: val => `Bs. ${val}`, sortable: true },
-      { name: 'carga_horaria', label: 'Carga', field: 'carga_horaria', align: 'center', sortable: true },
       { name: 'fecha_subida', label: 'Fecha de Subida', align: 'center', sortable: true },
       { name: 'estado_subida', label: 'Estado', align: 'center' },
       { name: 'actions', label: 'Acciones', align: 'center' }
@@ -334,6 +332,7 @@ export default {
       try {
         const token = localStorage.getItem('token')
         const response = await api.get('/cortes', {
+          params: { tipo_corte: 'PRACTICA' },
           headers: { Authorization: `Bearer ${token}` }
         })
         cortes.value = response.data
@@ -355,7 +354,7 @@ export default {
         const token = localStorage.getItem('token')
         const params = {
           corte_id: selectedCorte.value.id,
-          tipo_contrato: 'FACTURACION'
+          es_practica: true
         }
 
         if (estadoSubida.value?.value !== null) {
@@ -434,7 +433,7 @@ export default {
         const token = localStorage.getItem('token')
         const params = {
           corte_id: selectedCorte.value.id,
-          tipo_contrato: 'FACTURACION'
+          es_practica: true
         }
 
         if (estadoSubida.value?.value !== null && estadoSubida.value?.value !== 'null') {

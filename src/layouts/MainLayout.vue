@@ -107,6 +107,42 @@
               <q-item-label>Afiliación y Retención</q-item-label>
             </q-item-section>
           </q-item>
+
+          <q-separator class="q-my-sm" />
+
+          <q-item-label header class="text-weight-bold text-grey-8 q-px-md q-pt-sm q-pb-sm">
+            Prácticas Hospitalarias
+          </q-item-label>
+
+          <q-item clickable v-ripple to="/cortes-practicas" exact-active-class="bg-primary text-white"
+            class="q-mx-sm q-mb-xs rounded-borders">
+            <q-item-section avatar>
+              <q-icon name="event_available" />
+            </q-item-section>
+            <q-item-section>
+              <q-item-label>Cortes Prácticas</q-item-label>
+            </q-item-section>
+          </q-item>
+
+          <q-item clickable v-ripple to="/upload-practicas" exact-active-class="bg-primary text-white"
+            class="q-mx-sm q-mb-xs rounded-borders">
+            <q-item-section avatar>
+              <q-icon name="upload_file" />
+            </q-item-section>
+            <q-item-section>
+              <q-item-label>Subir Prácticas</q-item-label>
+            </q-item-section>
+          </q-item>
+
+          <q-item clickable v-ripple to="/control-practicas" exact-active-class="bg-primary text-white"
+            class="q-mx-sm q-mb-xs rounded-borders">
+            <q-item-section avatar>
+              <q-icon name="medical_services" />
+            </q-item-section>
+            <q-item-section>
+              <q-item-label>Control Prácticas</q-item-label>
+            </q-item-section>
+          </q-item>
         </q-list>
       </q-scroll-area>
     </q-drawer>

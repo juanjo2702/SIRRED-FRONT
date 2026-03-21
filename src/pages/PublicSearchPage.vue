@@ -32,16 +32,16 @@
                   <div class="text-h6 text-weight-bold">{{ searchResult.docente.nombre }} {{
                     searchResult.docente.apellidos }}</div>
                   <div class="text-subtitle2 opacity-80">CI: {{ searchResult.docente.ci }}</div>
-                  <div class="text-subtitle1 q-mt-sm">
-                    <q-badge color="secondary" class="q-pa-xs text-body2">
-                      {{ searchResult.corte_activo.nombre }}
-                    </q-badge>
-                  </div>
-                  <div class="text-caption q-mt-xs text-italic opacity-80">
-                    Periodo: {{ new Date(searchResult.corte_activo.fecha_inicio +
-                      'T00:00:00').toLocaleDateString() }} -
-                    {{ new Date(searchResult.corte_activo.fecha_fin +
-                      'T00:00:00').toLocaleDateString() }}
+                  <div v-for="corte in searchResult.cortes_activos" :key="corte.id" class="q-mt-sm">
+                    <div class="text-subtitle1">
+                      <q-badge :color="corte.tipo_corte === 'PRACTICA' ? 'purple' : 'secondary'" class="q-pa-xs text-body2">
+                        {{ corte.nombre }} {{ corte.tipo_corte === 'PRACTICA' ? '(Prácticas)' : '(Regular)' }}
+                      </q-badge>
+                    </div>
+                    <div class="text-caption text-italic opacity-80 q-mt-xs">
+                      Periodo: {{ new Date(corte.fecha_inicio + 'T00:00:00').toLocaleDateString() }} -
+                      {{ corte.fecha_fin ? new Date(corte.fecha_fin + 'T00:00:00').toLocaleDateString() : 'Indefinido' }}
+                    </div>
                   </div>
                 </div>
               </div>
@@ -54,18 +54,21 @@
                 <div class="row justify-between items-center">
                   <div>
                     <div class="text-subtitle1">
-                      <strong>{{ facturacion.sede_carrera.sede.nombre }}</strong> - {{
-                        facturacion.sede_carrera.carrera.nombre }}
+                      <strong>{{ facturacion.sede_carrera.sede.nombre }}</strong> - {{ facturacion.sede_carrera.carrera.nombre }}
                     </div>
-                    <div class="text-caption">
-                      Tipo: <q-badge :color="facturacion.tipo_contrato === 'FACTURACION' ? 'primary' : 'grey'">
-                        {{ facturacion.tipo_contrato }}
+                    <div class="text-caption text-weight-bold" v-if="facturacion.es_practica">
+                      Prácticas: {{ facturacion.materia_practica }} ({{ facturacion.hospital_practica }})
+                    </div>
+                    <div class="text-caption q-mt-xs">
+                      <q-badge color="dark" class="q-mr-xs">{{ facturacion.corte?.nombre }}</q-badge>
+                      Tipo: <q-badge :color="facturacion.es_practica ? 'purple' : (facturacion.tipo_contrato === 'FACTURACION' ? 'primary' : 'grey')">
+                        {{ facturacion.es_practica ? 'PRÁCTICAS HOSPITALARIAS' : facturacion.tipo_contrato }}
                       </q-badge>
                     </div>
                   </div>
                   <div class="text-right">
                     <div class="text-h6">Bs. {{ facturacion.monto }}</div>
-                    <div class="text-caption">Carga: {{ facturacion.carga_horaria }} hrs</div>
+                    <div class="text-caption" v-if="!facturacion.es_practica">Carga: {{ facturacion.carga_horaria }} hrs</div>
                   </div>
                 </div>
               </q-card-section>
