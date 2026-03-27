@@ -63,11 +63,11 @@
                         <q-input v-model="form.fecha_fin" label="Fecha de Fin" type="date" outlined dense
                             class="q-mb-md" />
                         <q-toggle v-model="form.estado" label="Activar este corte" color="positive" class="q-mb-md" />
-                        <q-banner v-if="form.estado" class="bg-warning text-white q-mb-md">
+                        <q-banner v-if="form.estado" class="bg-info text-white q-mb-md">
                             <template v-slot:avatar>
-                                <q-icon name="warning" />
+                                <q-icon name="info" />
                             </template>
-                            Al activar este corte, todos los demás se desactivarán automáticamente.
+                            Para prácticas, se permiten <strong>múltiples cortes activos</strong> simultáneamente. Activar este corte no desactivará los demás.
                         </q-banner>
 
                         <div class="row q-gutter-sm">

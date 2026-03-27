@@ -5,17 +5,25 @@
             <div class="text-caption text-grey-7">Cargue la información de docentes mediante archivo Excel</div>
         </div>
 
-        <q-card class="q-mb-md shadow-2" flat bordered>
-            <q-card-section class="bg-teal text-white">
-                <div class="row items-center">
-                    <q-icon name="event" size="28px" class="q-mr-sm" />
-                    <div>
-                        <div class="text-subtitle2">Corte Activo</div>
-                        <div class="text-h6">{{ corteActivo?.nombre || 'Ninguno' }}</div>
-                    </div>
-                </div>
-            </q-card-section>
-        </q-card>
+        <!-- Sin cortes activos -->
+        <q-banner v-if="cortesActivos.length === 0" class="bg-warning text-white q-mb-md" rounded>
+            <template v-slot:avatar>
+                <q-icon name="warning" />
+            </template>
+            <div class="text-weight-bold">No hay cortes de prácticas activos</div>
+            <div class="text-caption">Contacte al administrador para activar un corte de prácticas.</div>
+        </q-banner>
+
+        <!-- Cortes activos disponibles -->
+        <q-banner v-else class="bg-teal-1 text-teal-9 q-mb-md" rounded>
+            <template v-slot:avatar>
+                <q-icon name="event" color="teal" />
+            </template>
+            <span class="text-weight-bold">{{ cortesActivos.length }} corte(s) de prácticas activo(s):</span>
+            <span class="q-ml-sm" v-for="c in cortesActivos" :key="c.id">
+                <q-badge color="teal" class="q-mr-xs">{{ c.nombre }}</q-badge>
+            </span>
+        </q-banner>
 
         <q-card class="shadow-2" flat bordered>
             <q-card-section class="bg-grey-2">
@@ -27,6 +35,47 @@
             <q-card-section class="q-pa-md">
                 <q-form @submit="uploadExcel">
                     <div class="row q-col-gutter-md">
+
+                        <!-- Selector de corte de prácticas -->
+                        <div class="col-12">
+                            <q-select
+                                v-model="selectedCorte"
+                                :options="cortesActivos"
+                                option-label="nombre"
+                                option-value="id"
+                                label="Seleccionar Corte de Prácticas *"
+                                outlined
+                                :disable="cortesActivos.length === 0"
+                                :rules="[val => !!val || 'Debe seleccionar un corte']"
+                            >
+                                <template v-slot:prepend>
+                                    <q-icon name="event" color="teal" />
+                                </template>
+                                <template v-slot:option="scope">
+                                    <q-item v-bind="scope.itemProps">
+                                        <q-item-section avatar>
+                                            <q-icon name="event" color="teal" />
+                                        </q-item-section>
+                                        <q-item-section>
+                                            <q-item-label>{{ scope.opt.nombre }}</q-item-label>
+                                            <q-item-label caption>
+                                                {{ formatDate(scope.opt.fecha_inicio) }}
+                                                {{ scope.opt.fecha_fin ? ' — ' + formatDate(scope.opt.fecha_fin) : '' }}
+                                            </q-item-label>
+                                        </q-item-section>
+                                        <q-item-section side>
+                                            <q-badge color="teal">ACTIVO</q-badge>
+                                        </q-item-section>
+                                    </q-item>
+                                </template>
+                                <template v-slot:no-option>
+                                    <q-item>
+                                        <q-item-section class="text-grey">No hay cortes de prácticas activos</q-item-section>
+                                    </q-item>
+                                </template>
+                            </q-select>
+                        </div>
+
                         <div class="col-12 col-md-6">
                             <q-select
                                 v-model="selectedSede"
@@ -71,8 +120,6 @@
                             </q-select>
                         </div>
 
-                        <!-- Se removió select de tipoContrato ya que las prácticas siempre son FACTURACION -->
-
                         <div class="col-12 col-md-6">
                             <q-file
                                 v-model="file"
@@ -107,7 +154,7 @@
                             color="primary"
                             icon="upload"
                             :loading="uploading"
-                            :disable="!corteActivo"
+                            :disable="cortesActivos.length === 0 || !selectedCorte"
                             unelevated
                             size="md"
                         />
@@ -139,13 +186,23 @@ export default {
         const cortes = ref([])
         const selectedSede = ref(null)
         const selectedCarrera = ref(null)
-        const tipoContrato = ref(null)
+        const selectedCorte = ref(null)
         const file = ref(null)
         const uploading = ref(false)
         const allCarreras = ref([])
         const filteredCarreras = ref([])
 
-        const corteActivo = computed(() => cortes.value.find(c => c.estado === 1))
+        // Todos los cortes de prácticas activos (estado = 1)
+        const cortesActivos = computed(() => cortes.value.filter(c => c.estado === 1))
+
+        const formatDate = (dateString) => {
+            if (!dateString) return ''
+            const date = new Date(dateString + 'T00:00:00')
+            const day = String(date.getDate()).padStart(2, '0')
+            const month = String(date.getMonth() + 1).padStart(2, '0')
+            const year = date.getFullYear()
+            return `${day}/${month}/${year}`
+        }
 
         const loadSedes = async () => {
             try {
@@ -207,8 +264,8 @@ export default {
         }
 
         const uploadExcel = async () => {
-            if (!corteActivo.value) {
-                $q.notify({ type: 'warning', message: 'No hay corte activo' })
+            if (!selectedCorte.value) {
+                $q.notify({ type: 'warning', message: 'Debe seleccionar un corte de prácticas' })
                 return
             }
 
@@ -218,7 +275,7 @@ export default {
                 const formData = new FormData()
                 formData.append('file', file.value)
                 formData.append('sede_carrera_id', selectedCarrera.value.id)
-                formData.append('corte_id', corteActivo.value.id)
+                formData.append('corte_id', selectedCorte.value.id)
 
                 await api.post('/facturaciones/upload-excel-practicas', formData, {
                     headers: {
@@ -231,6 +288,7 @@ export default {
 
                 selectedSede.value = null
                 selectedCarrera.value = null
+                selectedCorte.value = null
                 file.value = null
             } catch (error) {
                 $q.notify({
@@ -256,11 +314,13 @@ export default {
             cortes,
             selectedSede,
             selectedCarrera,
+            selectedCorte,
             file,
             uploading,
-            corteActivo,
+            cortesActivos,
             allCarreras,
             filteredCarreras,
+            formatDate,
             loadCarrerasBySede,
             filterCarreras,
             onFileRejected,
@@ -270,3 +330,4 @@ export default {
     }
 }
 </script>
+
