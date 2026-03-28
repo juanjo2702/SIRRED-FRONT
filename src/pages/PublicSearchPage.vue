@@ -35,7 +35,7 @@
                   <div v-for="corte in searchResult.cortes_activos" :key="corte.id" class="q-mt-sm">
                     <div class="text-subtitle1">
                       <q-badge :color="corte.tipo_corte === 'PRACTICA' ? 'purple' : 'secondary'" class="q-pa-xs text-body2">
-                        {{ corte.nombre }} {{ corte.tipo_corte === 'PRACTICA' ? '(Prácticas)' : '(Regular)' }}
+                        {{ corte.nombre }} {{ corte.tipo_corte === 'PRACTICA' ? '(Prácticas)' : '' }}
                       </q-badge>
                     </div>
                     <div class="text-caption text-italic opacity-80 q-mt-xs">
