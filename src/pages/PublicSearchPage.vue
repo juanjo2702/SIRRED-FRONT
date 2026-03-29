@@ -35,7 +35,7 @@
                   <div v-for="corte in searchResult.cortes_activos" :key="corte.id" class="q-mt-sm">
                     <div class="text-subtitle1">
                       <q-badge :color="corte.tipo_corte === 'PRACTICA' ? 'purple' : 'secondary'" class="q-pa-xs text-body2">
-                        {{ corte.nombre }} {{ corte.tipo_corte === 'PRACTICA' ? '(Prácticas)' : '' }}
+                        {{ corte.nombre }}
                       </q-badge>
                     </div>
                     <div class="text-caption text-italic opacity-80 q-mt-xs">
@@ -61,9 +61,6 @@
                     </div>
                     <div class="text-caption q-mt-xs">
                       <q-badge color="dark" class="q-mr-xs">{{ facturacion.corte?.nombre }}</q-badge>
-                      Tipo: <q-badge :color="facturacion.es_practica ? 'purple' : (facturacion.tipo_contrato === 'FACTURACION' ? 'primary' : 'grey')">
-                        {{ facturacion.es_practica ? 'PRÁCTICAS HOSPITALARIAS' : facturacion.tipo_contrato }}
-                      </q-badge>
                     </div>
                   </div>
                   <div class="text-right">
