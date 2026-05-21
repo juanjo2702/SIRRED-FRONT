@@ -130,6 +130,10 @@
             <q-icon name="cancel" size="xs" class="q-mr-xs" />
             Denegado
           </q-badge>
+          <q-badge v-else-if="props.row.estado_subida === 'REZAGADO'" color="orange">
+            <q-icon name="schedule" size="xs" class="q-mr-xs" />
+            Rezagado
+          </q-badge>
         </q-td>
       </template>
 
@@ -139,6 +143,12 @@
             <q-btn v-if="props.row.factura_path" flat dense round color="primary" icon="visibility"
               @click="previewFactura(props.row)">
               <q-tooltip>Ver Factura</q-tooltip>
+            </q-btn>
+
+            <q-btn v-if="props.row.estado_subida === 'APROBADO' && props.row.dato_factura?.qr_url"
+              flat dense round color="info" icon="qr_code_2"
+              @click="openQrUrl(props.row.dato_factura.qr_url)">
+              <q-tooltip>Ver Enlace QR</q-tooltip>
             </q-btn>
 
             <q-btn v-if="props.row.estado_subida === 'SUBIDA'" flat dense round color="positive" icon="check_circle"
@@ -257,7 +267,8 @@ export default {
       { label: 'Pendientes', value: 'null' },
       { label: 'Subidas', value: 'SUBIDA' },
       { label: 'Aprobadas', value: 'APROBADO' },
-      { label: 'Denegadas', value: 'DENEGADO' }
+      { label: 'Denegadas', value: 'DENEGADO' },
+      { label: 'Rezagados', value: 'REZAGADO' }
     ]
 
     const columns = [
@@ -429,6 +440,24 @@ export default {
       })
     }
 
+    const openQrUrl = (url) => {
+      $q.dialog({
+        title: 'Enlace del Código QR',
+        message: url,
+        html: true,
+        ok: {
+          label: 'Abrir Enlace',
+          color: 'primary'
+        },
+        cancel: {
+          label: 'Cerrar',
+          flat: true
+        }
+      }).onOk(() => {
+        window.open(url, '_blank')
+      })
+    }
+
     const exportToExcel = async () => {
       try {
         const token = localStorage.getItem('token')
@@ -575,6 +604,7 @@ export default {
       downloadCurrentFactura,
       approveFactura,
       denyFactura,
+      openQrUrl,
       exportToExcel,
       editDialog,
       isBulkEdit,

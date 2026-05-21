@@ -23,12 +23,14 @@ const routes = [
       { path: 'cortes', component: () => import('pages/CortesPage.vue') },
       { path: 'sedes', component: () => import('pages/SedesPage.vue') },
       { path: 'carreras', component: () => import('pages/CarrerasPage.vue') },
+      { path: 'docentes', component: () => import('pages/DocentesPage.vue') },
       { path: 'upload', component: () => import('pages/UploadPage.vue') },
       { path: 'control', component: () => import('pages/ControlPage.vue') },
       { path: 'control-afiliacion-retencion', component: () => import('pages/AffiliationRetentionPage.vue') },
       { path: 'cortes-practicas', component: () => import('pages/CortesPracticasPage.vue') },
       { path: 'upload-practicas', component: () => import('pages/UploadPracticasPage.vue') },
-      { path: 'control-practicas', component: () => import('pages/ControlPracticasPage.vue') }
+      { path: 'control-practicas', component: () => import('pages/ControlPracticasPage.vue') },
+      { path: 'datos-extraidos', component: () => import('pages/DatosExtraidosPage.vue') }
     ]
   },
 

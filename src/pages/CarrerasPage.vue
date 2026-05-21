@@ -6,31 +6,16 @@
                 <q-btn color="primary" label="Nueva Carrera" icon="add" @click="openDialog()" unelevated />
             </div>
 
-            <q-input
-                v-model="searchQuery"
-                outlined
-                dense
-                placeholder="Buscar por nombre..."
-                class="q-mb-md"
-                clearable
-                style="max-width: 400px"
-            >
+            <q-input v-model="searchQuery" outlined dense placeholder="Buscar por nombre..." class="q-mb-md" clearable
+                style="max-width: 400px">
                 <template v-slot:prepend>
                     <q-icon name="search" />
                 </template>
             </q-input>
         </div>
 
-        <q-table
-            :rows="filteredCarreras"
-            :columns="columns"
-            row-key="id"
-            :loading="loading"
-            flat
-            bordered
-            :rows-per-page-options="[10, 25, 50]"
-            class="shadow-1"
-        >
+        <q-table :rows="filteredCarreras" :columns="columns" row-key="id" :loading="loading" flat bordered
+            :rows-per-page-options="[10, 25, 50]" class="shadow-1">
             <template v-slot:body-cell-actions="props">
                 <q-td :props="props">
                     <q-btn flat dense color="primary" icon="edit" @click="openDialog(props.row)">

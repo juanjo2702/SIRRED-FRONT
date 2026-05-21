@@ -78,6 +78,16 @@
             </q-item-section>
           </q-item>
 
+          <q-item clickable v-ripple to="/docentes" exact-active-class="bg-primary text-white"
+            class="q-mx-sm q-mb-xs rounded-borders">
+            <q-item-section avatar>
+              <q-icon name="person" />
+            </q-item-section>
+            <q-item-section>
+              <q-item-label>Docentes</q-item-label>
+            </q-item-section>
+          </q-item>
+
           <q-item clickable v-ripple to="/upload" exact-active-class="bg-primary text-white"
             class="q-mx-sm q-mb-xs rounded-borders">
             <q-item-section avatar>
@@ -141,6 +151,18 @@
             </q-item-section>
             <q-item-section>
               <q-item-label>Control Prácticas</q-item-label>
+            </q-item-section>
+          </q-item>
+          
+          <q-separator class="q-my-sm" />
+
+          <q-item clickable v-ripple to="/datos-extraidos" exact-active-class="bg-primary text-white"
+            class="q-mx-sm q-mb-xs rounded-borders">
+            <q-item-section avatar>
+              <q-icon name="analytics" />
+            </q-item-section>
+            <q-item-section>
+              <q-item-label>Datos Extraídos PDF</q-item-label>
             </q-item-section>
           </q-item>
         </q-list>
