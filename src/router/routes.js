@@ -19,6 +19,7 @@ const routes = [
     meta: { requiresAuth: true },
     children: [
       { path: '', component: () => import('pages/IndexPage.vue') },
+      { path: 'gestiones', component: () => import('pages/GestionesPage.vue') },
       { path: 'users', component: () => import('pages/UsersPage.vue') },
       { path: 'cortes', component: () => import('pages/CortesPage.vue') },
       { path: 'sedes', component: () => import('pages/SedesPage.vue') },

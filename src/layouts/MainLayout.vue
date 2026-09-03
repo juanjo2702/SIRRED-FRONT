@@ -48,6 +48,16 @@
             </q-item-section>
           </q-item>
 
+          <q-item clickable v-ripple to="/gestiones" exact-active-class="bg-primary text-white"
+            class="q-mx-sm q-mb-xs rounded-borders">
+            <q-item-section avatar>
+              <q-icon name="calendar_month" />
+            </q-item-section>
+            <q-item-section>
+              <q-item-label>Gestiones</q-item-label>
+            </q-item-section>
+          </q-item>
+
           <q-item clickable v-ripple to="/cortes" exact-active-class="bg-primary text-white"
             class="q-mx-sm q-mb-xs rounded-borders">
             <q-item-section avatar>
