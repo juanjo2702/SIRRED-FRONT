@@ -3,8 +3,12 @@ import axios from 'axios'
 
 // Detección dinámica del backend para evitar problemas de CORS y cambios manuales de .env
 let apiURL = import.meta.env.VITE_API_URL || 'http://localhost:8000/api'
-if (typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')) {
-  apiURL = 'http://localhost:8000/api'
+if (typeof window !== 'undefined') {
+  if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+    apiURL = 'http://localhost:8000/api'
+  } else if (window.location.hostname.includes('claure.pro')) {
+    apiURL = 'https://api.facturas.claure.pro/api'
+  }
 }
 
 console.log("VITE_API_URL resuelta dinámicamente:", apiURL)
