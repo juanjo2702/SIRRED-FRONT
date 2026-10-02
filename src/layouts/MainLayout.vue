@@ -14,6 +14,29 @@
           </div>
         </q-toolbar-title>
 
+        <q-btn
+          flat
+          dense
+          no-caps
+          icon="open_in_new"
+          label="Portal Docente"
+          class="q-mr-xs text-white"
+          @click="openPublicPortal"
+        >
+          <q-tooltip>Abrir enlace público donde los docentes suben facturas</q-tooltip>
+        </q-btn>
+
+        <q-btn
+          flat
+          round
+          dense
+          icon="share"
+          class="q-mr-sm text-white"
+          @click="copyPublicPortalLink"
+        >
+          <q-tooltip>Copiar enlace público para docentes</q-tooltip>
+        </q-btn>
+
         <q-btn flat round dense icon="logout" @click="logout" class="q-ml-sm">
           <q-tooltip>Cerrar Sesión</q-tooltip>
         </q-btn>
@@ -143,6 +166,27 @@
               <q-item-label>Control Prácticas</q-item-label>
             </q-item-section>
           </q-item>
+
+          <q-separator class="q-my-sm" />
+
+          <q-item-label header class="text-weight-bold text-grey-8 q-px-md q-pt-sm q-pb-xs">
+            Portal Público
+          </q-item-label>
+
+          <q-item clickable v-ripple @click="openPublicPortal" class="q-mx-sm q-mb-xs rounded-borders text-teal-9 bg-teal-1">
+            <q-item-section avatar>
+              <q-icon name="public" color="teal" />
+            </q-item-section>
+            <q-item-section>
+              <q-item-label class="text-weight-medium">Subida Docente</q-item-label>
+              <q-item-label caption>Enlace público externo</q-item-label>
+            </q-item-section>
+            <q-item-section side>
+              <q-btn flat round dense icon="content_copy" size="sm" color="teal" @click.stop="copyPublicPortalLink">
+                <q-tooltip>Copiar enlace</q-tooltip>
+              </q-btn>
+            </q-item-section>
+          </q-item>
         </q-list>
       </q-scroll-area>
     </q-drawer>
@@ -156,10 +200,12 @@
 <script>
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
+import { useQuasar } from 'quasar'
 
 export default {
   name: 'MainLayout',
   setup() {
+    const $q = useQuasar()
     const leftDrawerOpen = ref(true)
     const router = useRouter()
 
@@ -172,10 +218,52 @@ export default {
       router.push('/login')
     }
 
+    const getPublicPortalUrl = () => {
+      const resolved = router.resolve('/search')
+      return new URL(resolved.href, window.location.href).href
+    }
+
+    const openPublicPortal = () => {
+      const url = getPublicPortalUrl()
+      window.open(url, '_blank')
+    }
+
+    const copyPublicPortalLink = async () => {
+      const url = getPublicPortalUrl()
+      try {
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          await navigator.clipboard.writeText(url)
+        } else {
+          const input = document.createElement('textarea')
+          input.value = url
+          document.body.appendChild(input)
+          input.select()
+          document.execCommand('copy')
+          document.body.removeChild(input)
+        }
+        $q.notify({
+          type: 'positive',
+          icon: 'content_copy',
+          message: 'Enlace copiado al portapapeles',
+          caption: url,
+          position: 'top',
+          timeout: 3000
+        })
+      } catch (err) {
+        $q.notify({
+          type: 'negative',
+          message: 'No se pudo copiar el enlace automáticamente',
+          position: 'top'
+        })
+      }
+    }
+
     return {
       leftDrawerOpen,
       toggleLeftDrawer,
-      logout
+      logout,
+      openPublicPortal,
+      copyPublicPortalLink
     }
   }
 }

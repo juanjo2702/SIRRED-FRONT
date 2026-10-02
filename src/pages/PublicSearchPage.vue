@@ -2,9 +2,12 @@
   <q-page class="flex flex-center"
     style="background: linear-gradient(135deg, #663399 0%, #009999 100%); min-height: 100vh;">
     <q-card style="width: 800px; max-width: 95vw;">
-      <q-card-section class="bg-primary text-white text-center">
-        <div class="text-h5">SIRRED - Búsqueda de Información</div>
-        <div class="text-subtitle2">Universidad Técnica Privada Cosmos</div>
+      <q-card-section class="bg-primary text-white text-center relative-position">
+        <q-btn flat round dense icon="login" to="/login" class="absolute-top-right q-ma-sm text-white">
+          <q-tooltip>Iniciar Sesión (Administración)</q-tooltip>
+        </q-btn>
+        <div class="text-h5 text-weight-bold">SIRRED - Portal Docente</div>
+        <div class="text-subtitle2">Universidad Técnica Privada Cosmos · Subida de Facturas y Consulta</div>
       </q-card-section>
 
       <q-card-section>

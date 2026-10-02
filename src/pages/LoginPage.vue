@@ -127,6 +127,21 @@
                     </q-form>
                 </q-card-section>
 
+                <!-- Acceso Docente -->
+                <q-separator />
+                <q-card-section class="text-center bg-grey-1 q-py-md">
+                    <div class="text-caption text-grey-8 q-mb-xs">¿Es docente y necesita subir o consultar sus facturas?</div>
+                    <q-btn
+                        flat
+                        color="secondary"
+                        icon="cloud_upload"
+                        label="Ir al Portal de Facturación Docente"
+                        to="/search"
+                        no-caps
+                        class="text-weight-bold"
+                    />
+                </q-card-section>
+
                 <!-- Footer -->
                 <q-card-section class="text-center text-caption text-grey-6 q-pb-md">
                     © 2025 Universidad Técnica Privada Cosmos

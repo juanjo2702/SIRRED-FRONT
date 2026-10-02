@@ -301,7 +301,11 @@ export default {
         }
 
         const downloadTemplate = () => {
-            window.open(`${process.env.VITE_API_URL}/public/template-practicas`, '_blank')
+            let apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:8000/api'
+            if (typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')) {
+                apiUrl = 'http://localhost:8000/api'
+            }
+            window.open(`${apiUrl}/public/template-practicas`, '_blank')
         }
 
         onMounted(() => {

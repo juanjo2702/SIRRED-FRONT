@@ -1,9 +1,16 @@
 import { boot } from 'quasar/wrappers'
 import axios from 'axios'
 
-// Crear instancia de axios
+// Detección dinámica del backend para evitar problemas de CORS y cambios manuales de .env
+let apiURL = import.meta.env.VITE_API_URL || 'http://localhost:8000/api'
+if (typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')) {
+  apiURL = 'http://localhost:8000/api'
+}
+
+console.log("VITE_API_URL resuelta dinámicamente:", apiURL)
+
 export const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || 'http://localhost:8000'
+  baseURL: apiURL
 })
 
 export default boot(({ app, router }) => {

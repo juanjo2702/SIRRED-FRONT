@@ -29,6 +29,29 @@
 
     <!-- Dashboard Content -->
     <div v-else>
+      <!-- Quick Portal Docente Banner -->
+      <q-card class="q-mb-lg bg-teal-1 text-teal-10 border-teal shadow-1" flat bordered>
+        <q-card-section class="row items-center justify-between q-py-md">
+          <div class="row items-center q-gutter-sm col-12 col-md-8">
+            <q-avatar icon="cloud_upload" color="teal" text-color="white" size="42px" font-size="24px" />
+            <div>
+              <div class="text-subtitle1 text-weight-bold">Portal Público de Facturación Docente</div>
+              <div class="text-caption text-grey-8">
+                Enlace donde los docentes ingresan con su número de CI para consultar y subir sus facturas.
+              </div>
+            </div>
+          </div>
+          <div class="row q-gutter-sm col-12 col-md-4 justify-end q-mt-sm q-mt-md-none">
+            <q-btn outline color="teal-9" icon="content_copy" label="Copiar Enlace" no-caps @click="copyPublicPortalLink">
+              <q-tooltip>Copiar URL para compartir a docentes (WhatsApp/Correo)</q-tooltip>
+            </q-btn>
+            <q-btn unelevated color="teal" icon="open_in_new" label="Abrir Portal" no-caps @click="openPublicPortal">
+              <q-tooltip>Abrir la página de subida de facturas en nueva pestaña</q-tooltip>
+            </q-btn>
+          </div>
+        </q-card-section>
+      </q-card>
+
       <!-- KPI Cards -->
       <div class="row q-col-gutter-md q-mb-lg">
         <div class="col-12 col-sm-6 col-md-3">
@@ -214,6 +237,7 @@
 
 <script setup>
 import { ref, onMounted, computed } from 'vue'
+import { useRouter } from 'vue-router'
 import { api } from 'src/boot/axios'
 import { Notify } from 'quasar'
 import {
@@ -233,6 +257,48 @@ ChartJS.register(ArcElement, CategoryScale, LinearScale, BarElement, Title, Tool
 defineOptions({
   name: 'IndexPage'
 })
+
+const router = useRouter()
+
+const getPublicPortalUrl = () => {
+  const resolved = router.resolve('/search')
+  return new URL(resolved.href, window.location.href).href
+}
+
+const openPublicPortal = () => {
+  const url = getPublicPortalUrl()
+  window.open(url, '_blank')
+}
+
+const copyPublicPortalLink = async () => {
+  const url = getPublicPortalUrl()
+  try {
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      await navigator.clipboard.writeText(url)
+    } else {
+      const input = document.createElement('textarea')
+      input.value = url
+      document.body.appendChild(input)
+      input.select()
+      document.execCommand('copy')
+      document.body.removeChild(input)
+    }
+    Notify.create({
+      type: 'positive',
+      icon: 'content_copy',
+      message: 'Enlace del portal docente copiado',
+      caption: url,
+      position: 'top',
+      timeout: 3000
+    })
+  } catch (e) {
+    Notify.create({
+      type: 'negative',
+      message: 'No se pudo copiar el enlace automáticamente',
+      position: 'top'
+    })
+  }
+}
 
 const loading = ref(true)
 const stats = ref({})
