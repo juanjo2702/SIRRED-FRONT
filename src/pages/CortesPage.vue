@@ -20,22 +20,6 @@
                         </template>
                     </q-input>
                 </div>
-                <div class="col-12 col-sm-6 col-md-4">
-                    <q-select
-                        v-model="selectedGestionFilter"
-                        :options="gestionFilterOptions"
-                        option-label="label"
-                        option-value="value"
-                        label="Filtrar por Gestión"
-                        outlined
-                        dense
-                        clearable
-                    >
-                        <template v-slot:prepend>
-                            <q-icon name="calendar_month" />
-                        </template>
-                    </q-select>
-                </div>
             </div>
         </div>
 
@@ -49,15 +33,6 @@
             :rows-per-page-options="[10, 25, 50]"
             class="shadow-1"
         >
-            <template v-slot:body-cell-gestion="props">
-                <q-td :props="props">
-                    <q-badge v-if="props.row.gestion" color="indigo-7" class="text-weight-bold">
-                        {{ props.row.gestion.nombre }}
-                    </q-badge>
-                    <span v-else class="text-grey-6 text-caption">Sin gestión</span>
-                </q-td>
-            </template>
-
             <template v-slot:body-cell-estado="props">
                 <q-td :props="props">
                     <q-badge :color="props.row.estado ? 'positive' : 'grey'">
@@ -76,30 +51,13 @@
         </q-table>
 
         <q-dialog v-model="showDialog">
-            <q-card style="min-width: 420px">
+            <q-card style="min-width: 400px">
                 <q-card-section class="bg-primary text-white">
                     <div class="text-h6">{{ editMode ? 'Editar Corte' : 'Nuevo Corte' }}</div>
                 </q-card-section>
 
                 <q-card-section>
                     <q-form @submit="saveCorte">
-                        <q-select
-                            v-model="form.gestion_id"
-                            :options="gestiones"
-                            option-label="nombre"
-                            option-value="id"
-                            emit-value
-                            map-options
-                            label="Gestión Académica"
-                            outlined
-                            dense
-                            class="q-mb-md"
-                            clearable
-                        >
-                            <template v-slot:prepend>
-                                <q-icon name="calendar_month" />
-                            </template>
-                        </q-select>
 
                         <q-input v-model="form.nombre" label="Nombre del Corte" outlined dense class="q-mb-md"
                             :rules="[val => !!val || 'Requerido']" />
@@ -136,13 +94,11 @@ export default {
     setup() {
         const $q = useQuasar()
         const cortes = ref([])
-        const gestiones = ref([])
-        const selectedGestionFilter = ref(null)
         const loading = ref(false)
         const saving = ref(false)
         const showDialog = ref(false)
         const editMode = ref(false)
-        const form = ref({ id: null, gestion_id: null, nombre: '', fecha_inicio: '', fecha_fin: '', estado: false })
+        const form = ref({ id: null, nombre: '', fecha_inicio: '', fecha_fin: '', estado: false })
         const searchQuery = ref('')
 
         const formatDate = (dateString) => {
@@ -155,7 +111,6 @@ export default {
         }
 
         const columns = [
-            { name: 'gestion', label: 'Gestión', field: row => row.gestion?.nombre || '', align: 'center', sortable: true },
             { name: 'nombre', label: 'Nombre', field: 'nombre', align: 'left', sortable: true },
             {
                 name: 'fecha_inicio',
@@ -177,31 +132,15 @@ export default {
             { name: 'actions', label: 'Acciones', align: 'center' }
         ]
 
-        const gestionFilterOptions = computed(() => {
-            return [
-                { label: 'Todas las gestiones', value: null },
-                ...gestiones.value.map(g => ({ label: g.nombre, value: g.id }))
-            ]
-        })
-
         const filteredCortes = computed(() => {
-            let result = cortes.value
+            if (!searchQuery.value) return cortes.value
 
-            if (selectedGestionFilter.value && selectedGestionFilter.value.value !== null) {
-                result = result.filter(c => c.gestion_id === selectedGestionFilter.value.value)
-            }
-
-            if (searchQuery.value) {
-                const query = searchQuery.value.toLowerCase()
-                result = result.filter(corte =>
-                    corte.nombre?.toLowerCase().includes(query) ||
-                    corte.gestion?.nombre?.toLowerCase().includes(query) ||
-                    corte.fecha_inicio?.toLowerCase().includes(query) ||
-                    corte.fecha_fin?.toLowerCase().includes(query)
-                )
-            }
-
-            return result
+            const query = searchQuery.value.toLowerCase()
+            return cortes.value.filter(corte =>
+                corte.nombre?.toLowerCase().includes(query) ||
+                corte.fecha_inicio?.toLowerCase().includes(query) ||
+                corte.fecha_fin?.toLowerCase().includes(query)
+            )
         })
 
         const loadCortes = async () => {
@@ -219,23 +158,10 @@ export default {
             }
         }
 
-        const loadGestiones = async () => {
-            try {
-                const token = localStorage.getItem('token')
-                const response = await api.get('/gestiones', {
-                    headers: { Authorization: `Bearer ${token}` }
-                })
-                gestiones.value = response.data
-            } catch (error) {
-                console.error('Error al cargar gestiones', error)
-            }
-        }
-
         const openDialog = (corte = null) => {
             if (corte) {
                 form.value = {
                     id: corte.id,
-                    gestion_id: corte.gestion_id || null,
                     nombre: corte.nombre,
                     fecha_inicio: corte.fecha_inicio,
                     fecha_fin: corte.fecha_fin,
@@ -245,7 +171,6 @@ export default {
             } else {
                 form.value = {
                     id: null,
-                    gestion_id: null,
                     nombre: '',
                     fecha_inicio: '',
                     fecha_fin: '',
@@ -287,14 +212,10 @@ export default {
 
         onMounted(() => {
             loadCortes()
-            loadGestiones()
         })
 
         return {
             cortes,
-            gestiones,
-            selectedGestionFilter,
-            gestionFilterOptions,
             loading,
             saving,
             showDialog,
