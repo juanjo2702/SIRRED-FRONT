@@ -5,11 +5,11 @@
       <div class="col-12 col-md-6">
         <h4 class="text-h4 text-weight-bold q-ma-none text-primary">
           <q-icon name="dashboard" size="36px" class="q-mr-sm" />
-          Dashboard - {{ corteActivo?.nombre || 'Cargando...' }}
+          Dashboard - {{ corteActivo?.nombre || (loading ? 'Cargando...' : 'Sin Corte Activo') }}
         </h4>
         <p class="text-grey-7 q-mt-sm q-mb-none">
           {{ corteActivo ? `Período: ${formatDate(corteActivo.fecha_inicio)} - ${formatDate(corteActivo.fecha_fin)}` :
-            '' }}
+            (loading ? '' : 'No hay ningún corte activo en este momento. Puede activar uno desde el menú Cortes.') }}
         </p>
       </div>
       <div class="col-12 col-md-6 q-mt-md q-mt-md-none">
